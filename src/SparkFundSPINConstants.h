@@ -104,11 +104,15 @@
 #define CONFIG_OC_SD_DISABLE           0x0000  // Bridges do NOT shutdown on OC detect
 #define CONFIG_OC_SD_ENABLE            0x0080  // Bridges shutdown on OC detect
 
-// Configure the slew rate of the power bridge output
-#define CONFIG_POW_SR                  0x0300  // Mask for this bit field.
-#define CONFIG_SR_180V_us              0x0000  // 180V/us
-#define CONFIG_SR_290V_us              0x0200  // 290V/us
-#define CONFIG_SR_530V_us              0x0300  // 530V/us
+// Configure the UVLO protection thresholds
+#define CONFIG_UVLOVAL                 0x0100 // Mask for this bit.
+#define CONFIG_UVLOVAL_LOW             0x0000 // V_ccth 6.9V-6.3V, DV_BOOTTh 6V-5.5V
+#define CONFIG_UVLOVAL_HIGH            0x0200 // V_ccth 10.4V-10, DV_BOOTTh 9.2V-8.8V
+
+// Configure the Vcc voltage regulator output
+#define CONFIG_VCCVAL                  0x0200 // Mask for this bit.
+#define CONFIG_VCCVAL_7_5V             0x0000 // 7.5V Vcc output
+#define CONFIG_VCCVAL_15V              0x0200 // 15V Vcc output
 
 // Integer divisors for PWM sinewave generation
 //  See page 32 of the datasheet for more information on this.
@@ -183,8 +187,10 @@
 #define STALL_TH             0x14
 #define STEP_MODE            0x16
 #define ALARM_EN             0x17
-#define CONFIG               0x18
-#define STATUS               0x19
+#define GATECFG1             0x18
+#define GATECFG2             0x19
+#define CONFIG               0x1A
+#define STATUS               0x1B
 
 //dSPIN commands
 #define NOP                  0x00
