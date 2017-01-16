@@ -5,7 +5,7 @@
 
 // constant definitions for overcurrent thresholds. Write these values to 
 //  register OCD_TH to set the level at which an overcurrent even occurs.
-#define OCD_TH_375mA  0x00
+/*#define OCD_TH_375mA  0x00
 #define OCD_TH_750mA  0x01
 #define OCD_TH_1125mA 0x02
 #define OCD_TH_1500mA 0x03
@@ -20,7 +20,7 @@
 #define OCD_TH_4875mA 0x0C
 #define OCD_TH_5250mA 0x0D
 #define OCD_TH_5625mA 0x0E
-#define OCD_TH_6000mA 0x0F
+#define OCD_TH_6000mA 0x0F*/
 
 // STEP_MODE option values.
 // First comes the "microsteps per step" options...

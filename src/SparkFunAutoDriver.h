@@ -172,7 +172,7 @@ class AutoDriver
 #define STEP_FS_128 0x07
 
 // setOCThreshold() options
-#define OC_375mA  0x00
+/*#define OC_375mA  0x00
 #define OC_750mA  0x01
 #define OC_1125mA 0x02
 #define OC_1500mA 0x03
@@ -186,8 +186,8 @@ class AutoDriver
 #define OC_4500mA 0x0B
 #define OC_4875mA 0x0C
 #define OC_5250mA 0x0D
-#define OC_5625mA 0x0E
-#define OC_6000mA 0x0F
+#define OC_5625mA 0x0E 
+#define OC_6000mA 0x0F*/
 
 // PWM Multiplier and divisor options
 #define PWM_MUL_0_625           (0x00)<<10
@@ -206,10 +206,14 @@ class AutoDriver
 #define PWM_DIV_6               (0x05)<<13
 #define PWM_DIV_7               (0x06)<<13
 
-// Slew rate options
-#define SR_180V_us              0x0000  // 180V/us
-#define SR_290V_us              0x0200  // 290V/us
-#define SR_530V_us              0x0300  // 530V/us
+// Slew rate options, GATECFG1 7:5 = Igate, GATECFG1 4:0 = Tcc, 
+// see datasheet tables 11, 34, 35
+#define SR_114V_us              0x0040 | 0x0018  // 8mA | 3125ns = 114V/us
+#define SR_220V_us              0x0060 | 0x000C  // 16mA | 1625ns = 220V/us
+#define SR_400V_us              0x0080 | 0x0007  // 24mA | 1000ns = 400V/us
+#define SR_520V_us              0x00A0 | 0x0006  // 32mA | 875ns = 520V/us
+#define SR_790V_us              0x00C0 | 0x0003  // 64mA | 500ns = 790V/us
+#define SR_980V_us              0x00D0 | 0x0002  // 96mA | 275ns = 980V/us
 
 // Overcurrent bridge shutdown options
 #define OC_SD_DISABLE           0x0000  // Bridges do NOT shutdown on OC detect

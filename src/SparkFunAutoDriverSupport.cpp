@@ -238,13 +238,13 @@ long AutoDriver::paramHandler(byte param, unsigned long value)
     //  A set of defined constants is provided for the user's convenience. Default
     //  value is 3.375A- 0x08. This is a 4-bit value.
     case OCD_TH: 
-      value &= 0x0F;
+      value &= 0x1F;
       retVal = xferParam(value, 8);
       break;
     // Stall current threshold. Defaults to 0x40, or 2.03A. Value is from 31.25mA to
     //  4A in 31.25mA steps. This is a 7-bit value.
     case STALL_TH: 
-      value &= 0x7F;
+      value &= 0x1F;
       retVal = xferParam(value, 8);
       break;
     // STEP_MODE controls the microstepping settings, as well as the generation of an
@@ -262,6 +262,14 @@ long AutoDriver::paramHandler(byte param, unsigned long value)
     //  is provided to make this easy to interpret. By default, ALL alarms will trigger the
     //  FLAG pin.
     case ALARM_EN: 
+      retVal = xferParam(value, 8);
+      break;
+    // GATECFG1 controls driver transistor gate discharging and clock source monitoring
+    case GATECFG1:
+      retVal = xferParam(value, 16);
+      break;
+    // GATECFG2 controls driver dead time and blanking
+    case GATECFG2:
       retVal = xferParam(value, 8);
       break;
     // CONFIG contains some assorted configuration bits and fields. A fairly comprehensive

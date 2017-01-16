@@ -120,12 +120,12 @@ float AutoDriver::getDec()
 
 void AutoDriver::setOCThreshold(byte threshold)
 {
-  setParam(OCD_TH, 0x0F & threshold);
+  setParam(OCD_TH, 0x1F & threshold);
 }
 
 byte AutoDriver::getOCThreshold()
 {
-  return (byte) (getParam(OCD_TH) & 0xF);
+  return (byte) (getParam(OCD_TH) & 0x1F);
 }
 
 // The next few functions are all breakouts for individual options within the
@@ -159,16 +159,16 @@ int AutoDriver::getPWMFreqMultiplier()
   return (int) (getParam(CONFIG) & 0x1C00);
 }
 
-// Slew rate of the output in V/us. Can be 180, 290, or 530.
+// Slew rate of the output in V/us. Can be 114, 220, 400, 520, 790, 980.
 void AutoDriver::setSlewRate(int slewRate)
 {
-  unsigned long configVal = getParam(CONFIG);
+  unsigned long configVal = getParam(GATECFG1);
   
-  // These bits live in CONFIG 9:8, so the mask is 0x0300.
-  configVal &= ~(0x0300);
+  // These bits live in GATECFG1 7:0, so the mask is 0x00FF.
+  configVal &= ~(0x00FF);
   //Now, OR in the masked incoming value.
-  configVal |= (0x0300&slewRate);
-  setParam(CONFIG, configVal);
+  configVal |= (0x00FF&slewRate);
+  setParam(GATECFG1, configVal);
 }
 
 int AutoDriver::getSlewRate()
