@@ -1,18 +1,18 @@
-#ifndef AutoDriver_h
-#define AutoDriver_h
+#ifndef powerSTEP_h
+#define powerSTEP_h
 
 #include "Arduino.h"
 #include <SPI.h>
-#include "SparkFundSPINConstants.h"
+#include "powerSTEP01SPINConstants.h"
 
-class AutoDriver
+class powerSTEP
 {
   public:
     // Constructors. We'll ALWAYS want a CS pin and a reset pin, but we may
     //  not want a busy pin. By using two constructors, we make it easy to
     //  allow that.
-    AutoDriver(int position, int CSPin, int resetPin, int busyPin);
-    AutoDriver(int position, int CSPin, int resetPin);
+    powerSTEP(int position, int CSPin, int resetPin, int busyPin);
+    powerSTEP(int position, int CSPin, int resetPin);
 
     void SPIPortConnect(SPIClass *SPIPort);
     
@@ -170,24 +170,6 @@ class AutoDriver
 #define STEP_FS_32 0x05
 #define STEP_FS_64 0x06
 #define STEP_FS_128 0x07
-
-// setOCThreshold() options
-/*#define OC_375mA  0x00
-#define OC_750mA  0x01
-#define OC_1125mA 0x02
-#define OC_1500mA 0x03
-#define OC_1875mA 0x04
-#define OC_2250mA 0x05
-#define OC_2625mA 0x06
-#define OC_3000mA 0x07
-#define OC_3375mA 0x08
-#define OC_3750mA 0x09
-#define OC_4125mA 0x0A
-#define OC_4500mA 0x0B
-#define OC_4875mA 0x0C
-#define OC_5250mA 0x0D
-#define OC_5625mA 0x0E 
-#define OC_6000mA 0x0F*/
 
 // PWM Multiplier and divisor options
 #define PWM_MUL_0_625           (0x00)<<10

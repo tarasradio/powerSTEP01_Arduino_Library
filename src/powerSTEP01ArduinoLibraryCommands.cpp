@@ -1,11 +1,11 @@
-#include "SparkFunAutoDriver.h"
+#include "powerSTEP01ArduinoLibrary.h"
 
 //commands.ino - Contains high-level command implementations- movement
 //   and configuration commands, for example.
 
 // Realize the "set parameter" function, to write to the various registers in
 //  the dSPIN chip.
-void AutoDriver::setParam(byte param, unsigned long value) 
+void powerSTEP::setParam(byte param, unsigned long value) 
 {
   param |= SET_PARAM;
   SPIXfer((byte)param);
@@ -14,7 +14,7 @@ void AutoDriver::setParam(byte param, unsigned long value)
 
 // Realize the "get parameter" function, to read from the various registers in
 //  the dSPIN chip.
-long AutoDriver::getParam(byte param)
+long powerSTEP::getParam(byte param)
 {
   SPIXfer(param | GET_PARAM);
   return paramHandler(param, 0);
@@ -24,7 +24,7 @@ long AutoDriver::getParam(byte param)
 //  indicating the number of steps the motor has traveled from the HOME
 //  position. HOME is defined by zeroing this register, and it is zero on
 //  startup.
-long AutoDriver::getPos()
+long powerSTEP::getPos()
 {
   long temp = getParam(ABS_POS);
   
@@ -36,7 +36,7 @@ long AutoDriver::getPos()
 }
 
 // Just like getPos(), but for MARK.
-long AutoDriver::getMark()
+long powerSTEP::getMark()
 {
   long temp = getParam(MARK);
   
@@ -53,7 +53,7 @@ long AutoDriver::getMark()
 //  will switch the device into full-step mode.
 // The spdCalc() function is provided to convert steps/s values into
 //  appropriate integer values for this function.
-void AutoDriver::run(byte dir, float stepsPerSec)
+void powerSTEP::run(byte dir, float stepsPerSec)
 {
   SPIXfer(RUN | dir);
   unsigned long integerSpeed = spdCalc(stepsPerSec);
@@ -80,7 +80,7 @@ void AutoDriver::run(byte dir, float stepsPerSec)
 //  the direction (set by the FWD and REV constants) imposed by the call
 //  of this function. Motion commands (RUN, MOVE, etc) will cause the device
 //  to exit step clocking mode.
-void AutoDriver::stepClock(byte dir)
+void powerSTEP::stepClock(byte dir)
 {
   SPIXfer(STEP_CLOCK | dir);
 }
@@ -89,7 +89,7 @@ void AutoDriver::stepClock(byte dir)
 //  direction imposed by dir (FWD or REV constants may be used). The motor
 //  will accelerate according the acceleration and deceleration curves, and
 //  will run at MAX_SPEED. Stepping mode will adhere to FS_SPD value, as well.
-void AutoDriver::move(byte dir, unsigned long numSteps)
+void powerSTEP::move(byte dir, unsigned long numSteps)
 {
   SPIXfer(MOVE | dir);
   if (numSteps > 0x3FFFFF) numSteps = 0x3FFFFF;
@@ -104,7 +104,7 @@ void AutoDriver::move(byte dir, unsigned long numSteps)
 // GOTO operates much like MOVE, except it produces absolute motion instead
 //  of relative motion. The motor will be moved to the indicated position
 //  in the shortest possible fashion.
-void AutoDriver::goTo(long pos)
+void powerSTEP::goTo(long pos)
 {
   SPIXfer(GOTO);
   if (pos > 0x3FFFFF) pos = 0x3FFFFF;
@@ -117,7 +117,7 @@ void AutoDriver::goTo(long pos)
 }
 
 // Same as GOTO, but with user constrained rotational direction.
-void AutoDriver::goToDir(byte dir, long pos)
+void powerSTEP::goToDir(byte dir, long pos)
 {
   SPIXfer(GOTO_DIR | dir);
   if (pos > 0x3FFFFF) pos = 0x3FFFFF;
@@ -135,7 +135,7 @@ void AutoDriver::goToDir(byte dir, long pos)
 //  performed at the falling edge, and depending on the value of
 //  act (either RESET or COPY) the value in the ABS_POS register is
 //  either RESET to 0 or COPY-ed into the MARK register.
-void AutoDriver::goUntil(byte action, byte dir, float stepsPerSec)
+void powerSTEP::goUntil(byte action, byte dir, float stepsPerSec)
 {
   SPIXfer(GO_UNTIL | action | dir);
   unsigned long integerSpeed = spdCalc(stepsPerSec);
@@ -155,7 +155,7 @@ void AutoDriver::goUntil(byte action, byte dir, float stepsPerSec)
 //  and the ABS_POS register is either COPY-ed into MARK or RESET to
 //  0, depending on whether RESET or COPY was passed to the function
 //  for act.
-void AutoDriver::releaseSw(byte action, byte dir)
+void powerSTEP::releaseSw(byte action, byte dir)
 {
   SPIXfer(RELEASE_SW | action | dir);
 }
@@ -163,7 +163,7 @@ void AutoDriver::releaseSw(byte action, byte dir)
 // GoHome is equivalent to GoTo(0), but requires less time to send.
 //  Note that no direction is provided; motion occurs through shortest
 //  path. If a direction is required, use GoTo_DIR().
-void AutoDriver::goHome()
+void powerSTEP::goHome()
 {
   SPIXfer(GO_HOME);
 }
@@ -171,57 +171,57 @@ void AutoDriver::goHome()
 // GoMark is equivalent to GoTo(MARK), but requires less time to send.
 //  Note that no direction is provided; motion occurs through shortest
 //  path. If a direction is required, use GoTo_DIR().
-void AutoDriver::goMark()
+void powerSTEP::goMark()
 {
   SPIXfer(GO_MARK);
 }
 
 // setMark() and setHome() allow the user to define new MARK or
 //  ABS_POS values.
-void AutoDriver::setMark(long newMark)
+void powerSTEP::setMark(long newMark)
 {
   setParam(MARK, newMark);
 }
 
-void AutoDriver::setPos(long newPos)
+void powerSTEP::setPos(long newPos)
 {
   setParam(ABS_POS, newPos);
 }
 
 // Sets the ABS_POS register to 0, effectively declaring the current
 //  position to be "HOME".
-void AutoDriver::resetPos()
+void powerSTEP::resetPos()
 {
   SPIXfer(RESET_POS);
 }
 
 // Reset device to power up conditions. Equivalent to toggling the STBY
 //  pin or cycling power.
-void AutoDriver::resetDev()
+void powerSTEP::resetDev()
 {
   SPIXfer(RESET_DEVICE);
 }
   
 // Bring the motor to a halt using the deceleration curve.
-void AutoDriver::softStop()
+void powerSTEP::softStop()
 {
   SPIXfer(SOFT_STOP);
 }
 
 // Stop the motor with infinite deceleration.
-void AutoDriver::hardStop()
+void powerSTEP::hardStop()
 {
   SPIXfer(HARD_STOP);
 }
 
 // Decelerate the motor and put the bridges in Hi-Z state.
-void AutoDriver::softHiZ()
+void powerSTEP::softHiZ()
 {
   SPIXfer(SOFT_HIZ);
 }
 
 // Put the bridges in Hi-Z state immediately with no deceleration.
-void AutoDriver::hardHiZ()
+void powerSTEP::hardHiZ()
 {
   SPIXfer(HARD_HIZ);
 }
@@ -229,7 +229,7 @@ void AutoDriver::hardHiZ()
 // Fetch and return the 16-bit value in the STATUS register. Resets
 //  any warning flags and exits any error states. Using GetParam()
 //  to read STATUS does not clear these values.
-int AutoDriver::getStatus()
+int powerSTEP::getStatus()
 {
   int temp = 0;
   byte* bytePointer = (byte*)&temp;

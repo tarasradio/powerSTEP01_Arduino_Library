@@ -1,8 +1,8 @@
-#include "SparkFunAutoDriver.h"
+#include "powerSTEP01ArduinoLibrary.h"
 
 // Setup the SYNC/BUSY pin to be either SYNC or BUSY, and to a desired
 //  ticks per step level.
-void AutoDriver::configSyncPin(byte pinFunc, byte syncSteps)
+void powerSTEP::configSyncPin(byte pinFunc, byte syncSteps)
 {
   // Only some of the bits in this register are of interest to us; we need to
   //  clear those bits. It happens that they are the upper four.
@@ -21,7 +21,7 @@ void AutoDriver::configSyncPin(byte pinFunc, byte syncSteps)
 
 // The dSPIN chip supports microstepping for a smoother ride. This function
 //  provides an easy front end for changing the microstepping mode.
-void AutoDriver::configStepMode(byte stepMode)
+void powerSTEP::configStepMode(byte stepMode)
 {
 
   // Only some of these bits are useful (the lower three). We'll extract the
@@ -37,12 +37,12 @@ void AutoDriver::configStepMode(byte stepMode)
   setParam(STEP_MODE, (unsigned long)stepModeConfig);
 }
 
-byte AutoDriver::getStepMode() {
+byte powerSTEP::getStepMode() {
   return (byte)(getParam(STEP_MODE) & 0x07);
 }
 
 // This is the maximum speed the dSPIN will attempt to produce.
-void AutoDriver::setMaxSpeed(float stepsPerSecond)
+void powerSTEP::setMaxSpeed(float stepsPerSecond)
 {
   // We need to convert the floating point stepsPerSecond into a value that
   //  the dSPIN can understand. Fortunately, we have a function to do that.
@@ -53,7 +53,7 @@ void AutoDriver::setMaxSpeed(float stepsPerSecond)
 }
 
 
-float AutoDriver::getMaxSpeed()
+float powerSTEP::getMaxSpeed()
 {
   return maxSpdParse(getParam(MAX_SPEED));
 }
@@ -61,7 +61,7 @@ float AutoDriver::getMaxSpeed()
 // Set the minimum speed allowable in the system. This is the speed a motion
 //  starts with; it will then ramp up to the designated speed or the max
 //  speed, using the acceleration profile.
-void AutoDriver::setMinSpeed(float stepsPerSecond)
+void powerSTEP::setMinSpeed(float stepsPerSecond)
 {
   // We need to convert the floating point stepsPerSecond into a value that
   //  the dSPIN can understand. Fortunately, we have a function to do that.
@@ -74,20 +74,20 @@ void AutoDriver::setMinSpeed(float stepsPerSecond)
   setParam(MIN_SPEED, integerSpeed | temp);
 }
 
-float AutoDriver::getMinSpeed()
+float powerSTEP::getMinSpeed()
 {
   return minSpdParse(getParam(MIN_SPEED));
 }
 
 // Above this threshold, the dSPIN will cease microstepping and go to full-step
 //  mode. 
-void AutoDriver::setFullSpeed(float stepsPerSecond)
+void powerSTEP::setFullSpeed(float stepsPerSecond)
 {
   unsigned long integerSpeed = FSCalc(stepsPerSecond);
   setParam(FS_SPD, integerSpeed);
 }
 
-float AutoDriver::getFullSpeed()
+float powerSTEP::getFullSpeed()
 {
   return FSParse(getParam(FS_SPD));
 }
@@ -95,35 +95,35 @@ float AutoDriver::getFullSpeed()
 // Set the acceleration rate, in steps per second per second. This value is
 //  converted to a dSPIN friendly value. Any value larger than 29802 will
 //  disable acceleration, putting the chip in "infinite" acceleration mode.
-void AutoDriver::setAcc(float stepsPerSecondPerSecond)
+void powerSTEP::setAcc(float stepsPerSecondPerSecond)
 {
   unsigned long integerAcc = accCalc(stepsPerSecondPerSecond);
   setParam(ACC, integerAcc);
 }
 
-float AutoDriver::getAcc()
+float powerSTEP::getAcc()
 {
   return accParse(getParam(ACC));
 }
 
 // Same rules as setAcc().
-void AutoDriver::setDec(float stepsPerSecondPerSecond)
+void powerSTEP::setDec(float stepsPerSecondPerSecond)
 {
   unsigned long integerDec = decCalc(stepsPerSecondPerSecond);
   setParam(DECEL, integerDec);
 }
 
-float AutoDriver::getDec()
+float powerSTEP::getDec()
 {
   return accParse(getParam(DECEL));
 }
 
-void AutoDriver::setOCThreshold(byte threshold)
+void powerSTEP::setOCThreshold(byte threshold)
 {
   setParam(OCD_TH, 0x1F & threshold);
 }
 
-byte AutoDriver::getOCThreshold()
+byte powerSTEP::getOCThreshold()
 {
   return (byte) (getParam(OCD_TH) & 0x1F);
 }
@@ -136,7 +136,7 @@ byte AutoDriver::getOCThreshold()
 //  Divisors of 1-7 are available; multipliers of .625-2 are available. See
 //  datasheet for more details; it's not clear what the frequency being
 //  multiplied/divided here is, but it is clearly *not* the actual clock freq.
-void AutoDriver::setPWMFreq(int divisor, int multiplier)
+void powerSTEP::setPWMFreq(int divisor, int multiplier)
 {
   unsigned long configVal = getParam(CONFIG);
   
@@ -149,18 +149,18 @@ void AutoDriver::setPWMFreq(int divisor, int multiplier)
   setParam(CONFIG, configVal);
 }
 
-int AutoDriver::getPWMFreqDivisor()
+int powerSTEP::getPWMFreqDivisor()
 {
   return (int) (getParam(CONFIG) & 0xE000);
 }
 
-int AutoDriver::getPWMFreqMultiplier()
+int powerSTEP::getPWMFreqMultiplier()
 {
   return (int) (getParam(CONFIG) & 0x1C00);
 }
 
 // Slew rate of the output in V/us. Can be 114, 220, 400, 520, 790, 980.
-void AutoDriver::setSlewRate(int slewRate)
+void powerSTEP::setSlewRate(int slewRate)
 {
   unsigned long configVal = getParam(GATECFG1);
   
@@ -171,13 +171,13 @@ void AutoDriver::setSlewRate(int slewRate)
   setParam(GATECFG1, configVal);
 }
 
-int AutoDriver::getSlewRate()
+int powerSTEP::getSlewRate()
 {
   return (int) (getParam(CONFIG) & 0x0300);
 }
 
 // Single bit- do we shutdown the drivers on overcurrent or not?
-void AutoDriver::setOCShutdown(int OCShutdown)
+void powerSTEP::setOCShutdown(int OCShutdown)
 {
   unsigned long configVal = getParam(CONFIG);
   // This bit is CONFIG 7, mask is 0x0080
@@ -187,14 +187,14 @@ void AutoDriver::setOCShutdown(int OCShutdown)
   setParam(CONFIG, configVal);
 }
 
-int AutoDriver::getOCShutdown()
+int powerSTEP::getOCShutdown()
 {
   return (int) (getParam(CONFIG) & 0x0080);
 }
 
 // Enable motor voltage compensation? Not at all straightforward- check out
 //  p34 of the datasheet.
-void AutoDriver::setVoltageComp(int vsCompMode)
+void powerSTEP::setVoltageComp(int vsCompMode)
 {
   unsigned long configVal = getParam(CONFIG);
   // This bit is CONFIG 5, mask is 0x0020
@@ -204,14 +204,14 @@ void AutoDriver::setVoltageComp(int vsCompMode)
   setParam(CONFIG, configVal);
 }
 
-int AutoDriver::getVoltageComp()
+int powerSTEP::getVoltageComp()
 {
   return (int) (getParam(CONFIG) & 0x0020);
 }
 
 // The switch input can either hard-stop the driver _or_ activate an interrupt.
 //  This bit allows you to select what it does.
-void AutoDriver::setSwitchMode(int switchMode)
+void powerSTEP::setSwitchMode(int switchMode)
 {
   unsigned long configVal = getParam(CONFIG);
   // This bit is CONFIG 4, mask is 0x0010
@@ -221,7 +221,7 @@ void AutoDriver::setSwitchMode(int switchMode)
   setParam(CONFIG, configVal);
 }
 
-int AutoDriver::getSwitchMode()
+int powerSTEP::getSwitchMode()
 {
   return (int) (getParam(CONFIG) & 0x0010);
 }
@@ -232,7 +232,7 @@ int AutoDriver::getSwitchMode()
 //  frequency you want to drive it; practically, this library assumes it's
 //  being driven at 16MHz. Also, the device will use these bits to set the
 //  math used to figure out steps per second and stuff like that.
-void AutoDriver::setOscMode(int oscillatorMode)
+void powerSTEP::setOscMode(int oscillatorMode)
 {
   unsigned long configVal = getParam(CONFIG);
   // These bits are CONFIG 3:0, mask is 0x000F
@@ -242,7 +242,7 @@ void AutoDriver::setOscMode(int oscillatorMode)
   setParam(CONFIG, configVal);
 }
 
-int AutoDriver::getOscMode()
+int powerSTEP::getOscMode()
 {
   return (int) (getParam(CONFIG) & 0x000F);
 }
@@ -252,42 +252,42 @@ int AutoDriver::getOscMode()
 //  tweaking KVAL has proven effective in the past. There's a separate register
 //  for each case: running, static, accelerating, and decelerating.
 
-void AutoDriver::setAccKVAL(byte kvalInput)
+void powerSTEP::setAccKVAL(byte kvalInput)
 {
   setParam(KVAL_ACC, kvalInput);
 }
 
-byte AutoDriver::getAccKVAL()
+byte powerSTEP::getAccKVAL()
 {
   return (byte) getParam(KVAL_ACC);
 }
 
-void AutoDriver::setDecKVAL(byte kvalInput)
+void powerSTEP::setDecKVAL(byte kvalInput)
 {
   setParam(KVAL_DEC, kvalInput);
 }
 
-byte AutoDriver::getDecKVAL()
+byte powerSTEP::getDecKVAL()
 {
   return (byte) getParam(KVAL_DEC);
 }
 
-void AutoDriver::setRunKVAL(byte kvalInput)
+void powerSTEP::setRunKVAL(byte kvalInput)
 {
   setParam(KVAL_RUN, kvalInput);
 }
 
-byte AutoDriver::getRunKVAL()
+byte powerSTEP::getRunKVAL()
 {
   return (byte) getParam(KVAL_RUN);
 }
 
-void AutoDriver::setHoldKVAL(byte kvalInput)
+void powerSTEP::setHoldKVAL(byte kvalInput)
 {
   setParam(KVAL_HOLD, kvalInput);
 }
 
-byte AutoDriver::getHoldKVAL()
+byte powerSTEP::getHoldKVAL()
 {
   return (byte) getParam(KVAL_HOLD);
 }
@@ -295,7 +295,7 @@ byte AutoDriver::getHoldKVAL()
 // Enable or disable the low-speed optimization option. With LSPD_OPT enabled,
 //  motion starts from 0 instead of MIN_SPEED and low-speed optimization keeps
 //  the driving sine wave prettier than normal until MIN_SPEED is reached.
-void AutoDriver::setLoSpdOpt(boolean enable)
+void powerSTEP::setLoSpdOpt(boolean enable)
 {
   unsigned long temp = getParam(MIN_SPEED);
   if (enable) temp |= 0x00001000; // Set the LSPD_OPT bit
@@ -303,7 +303,7 @@ void AutoDriver::setLoSpdOpt(boolean enable)
   setParam(MIN_SPEED, temp);
 }
 
-boolean AutoDriver::getLoSpdOpt()
+boolean powerSTEP::getLoSpdOpt()
 {
   return (boolean) ((getParam(MIN_SPEED) & 0x00001000) != 0);
 }

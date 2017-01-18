@@ -1,10 +1,10 @@
 #include <SPI.h>
-#include "SparkFunAutoDriver.h"
+#include "powerSTEP01ArduinoLibrary.h"
 
-int AutoDriver::_numBoards;
+int powerSTEP::_numBoards;
 
 // Constructors
-AutoDriver::AutoDriver(int position, int CSPin, int resetPin, int busyPin)
+powerSTEP::powerSTEP(int position, int CSPin, int resetPin, int busyPin)
 {
   _CSPin = CSPin;
   _position = position;
@@ -14,7 +14,7 @@ AutoDriver::AutoDriver(int position, int CSPin, int resetPin, int busyPin)
   _SPI = &SPI;
 }
 
-AutoDriver::AutoDriver(int position, int CSPin, int resetPin)
+powerSTEP::powerSTEP(int position, int CSPin, int resetPin)
 {
   _CSPin = CSPin;
   _position = position;
@@ -24,12 +24,12 @@ AutoDriver::AutoDriver(int position, int CSPin, int resetPin)
   _SPI = &SPI;
 }
 
-void AutoDriver::SPIPortConnect(SPIClass *SPIPort)
+void powerSTEP::SPIPortConnect(SPIClass *SPIPort)
 {
   _SPI = SPIPort;
 }
 
-int AutoDriver::busyCheck(void)
+int powerSTEP::busyCheck(void)
 {
   if (_busyPin == -1)
   {

@@ -3,25 +3,6 @@
 
 // Constant definitions provided by ST
 
-// constant definitions for overcurrent thresholds. Write these values to 
-//  register OCD_TH to set the level at which an overcurrent even occurs.
-/*#define OCD_TH_375mA  0x00
-#define OCD_TH_750mA  0x01
-#define OCD_TH_1125mA 0x02
-#define OCD_TH_1500mA 0x03
-#define OCD_TH_1875mA 0x04
-#define OCD_TH_2250mA 0x05
-#define OCD_TH_2625mA 0x06
-#define OCD_TH_3000mA 0x07
-#define OCD_TH_3375mA 0x08
-#define OCD_TH_3750mA 0x09
-#define OCD_TH_4125mA 0x0A
-#define OCD_TH_4500mA 0x0B
-#define OCD_TH_4875mA 0x0C
-#define OCD_TH_5250mA 0x0D
-#define OCD_TH_5625mA 0x0E
-#define OCD_TH_6000mA 0x0F*/
-
 // STEP_MODE option values.
 // First comes the "microsteps per step" options...
 #define STEP_MODE_STEP_SEL 0x07  // Mask for these bits only.

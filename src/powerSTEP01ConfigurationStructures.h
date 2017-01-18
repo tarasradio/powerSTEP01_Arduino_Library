@@ -1,4 +1,4 @@
-#include "SparkFunAutoDriver.h"
+#include "powerSTEP01ArduinoLibrary.h"
 
 struct basicPowerSTEP01Configuration
 {
