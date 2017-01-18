@@ -2,14 +2,13 @@
 // X-NUCLEO-IHM03A1 stepper motor driver shield on an Arduino Uno-compatible board
 
 // Written 2017/1/17 by Elliot Baptist for Number Eight Innovation
-// Using a version of the SparkFun AutoDriver library modified for the powerSTEP01 
+// Using a version of the SparkFun powerSTEP library modified for the powerSTEP01 
 
 // Configuration structures used for EEPROM saving of configuration
 #include "powerSTEP01MegunolinkConfiguration.h"
-//#include "powerSTEP01MegunolinkCommands.h"
 
 // Driver includes
-#include "SparkFunAutoDriver.h"
+#include "powerSTEP01ArduinoLibrary.h"
 #include "SPI.h"
 
 // MegunoLink control includes
@@ -17,8 +16,7 @@
 #include "CommandHandler.h"
 #include "EEPROMStore.h"
 
-
-// Pin definitions for the X-NUCLEO-IHM03A1 connected to an Uno-compatible board
+// Pin definitions for the X-NUCLEO-IHM03A1 connected to an Uno-compatible controller
 #define nCS_PIN 10
 #define STCK_PIN 9
 #define nSTBY_nRESET_PIN 8
@@ -26,20 +24,25 @@
 
 // powerSTEP library instance, parameters are distance from the end of a daisy-chain
 // of drivers, !CS pin, !STBY/!Reset pin
-AutoDriver driver(0, nCS_PIN, nSTBY_nRESET_PIN);
+powerSTEP driver(0, nCS_PIN, nSTBY_nRESET_PIN);
 
-
+// The Command Handler processes serial commands and starts the function we
+// registered with the command, including supplied parameters
 CommandHandler<40> SerialCommandHandler;
+
+// The EEPROM Store saves the configuration values received from the 
+// Megunolink interface and checks them for errors on load
 EEPROMStore<basicPowerSTEP01Configuration> Config;
 
-
+// setup ------------------------------------------------------------ setup
 void setup() 
 {
   // Start serial
   Serial.begin(9600);
   Serial.println(F("powerSTEP01 MegunoLink control initialising..."));
 
-  // Setup commands
+  // Setup serial commands  -----------------------------------------------
+  //                            <serial command> <function triggered>
   SerialCommandHandler.AddCommand(F("GetStatus"), Cmd_GetStatus);
 
   SerialCommandHandler.AddCommand(F("SetMaxSpeed"), Cmd_SetMaxSpeed);
@@ -54,7 +57,6 @@ void setup()
   SerialCommandHandler.AddCommand(F("GoUntil"), Cmd_GoUntil);
   SerialCommandHandler.AddCommand(F("ReleaseSw"), Cmd_ReleaseSw);
   SerialCommandHandler.AddCommand(F("GoHome"), Cmd_GoHome);
-  //SerialCommandHandler.AddCommand(F("AutoHome"), Cmd_AutoHome);
   SerialCommandHandler.AddCommand(F("SetPos"), Cmd_SetPos);
   SerialCommandHandler.AddCommand(F("ResetPos"), Cmd_ResetPos); 
   SerialCommandHandler.AddCommand(F("SoftStop"), Cmd_SoftStop);
@@ -64,6 +66,7 @@ void setup()
 
   SerialCommandHandler.SetDefaultHandler(Cmd_Unknown);
 
+  // powerSTEP01 setup ----------------------------------------------------
   // Prepare pins
   pinMode(nSTBY_nRESET_PIN, OUTPUT);
   pinMode(nCS_PIN, OUTPUT);
@@ -85,20 +88,26 @@ void setup()
   driver.SPIPortConnect(&SPI); // give library the SPI port (only the one on an Uno)
   
   driver.configSyncPin(BUSY_PIN, 0);// use SYNC/nBUSY pin as nBUSY, 
-                                     // thus syncSteps (2nd paramater) does nothing
+                                    // thus syncSteps (2nd paramater) does nothing
                                      
-  driver.configStepMode(STEP_FS_128); // full steps, eg. 1/8 microstepping = STEP_FS_8,
-                                // options: 1, 1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128
+  driver.configStepMode(STEP_FS_128); // 1/128 microstepping, full steps = STEP_FS,
+                               // options: 1, 1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128
   
-  driver.setMaxSpeed(Config.Data.maxSpeed); // full steps/s 
-  driver.setFullSpeed(2000); // full steps/s threshold above which will use full steps
+  driver.setMaxSpeed(Config.Data.maxSpeed); // max speed in units of full steps/s 
+  driver.setFullSpeed(2000); // full steps/s threshold for disabling microstepping
   driver.setAcc(2000); // full steps/s^2 acceleration
   driver.setDec(2000); // full steps/s^2 deceleration
   
-  driver.setSlewRate(SR_520V_us); // faster may give more torque (and EM noise),
+  driver.setSlewRate(SR_520V_us); // faster may give more torque (but also EM noise),
                                   // options are: 114, 220, 400, 520, 790, 980(V/us)
                                   
   driver.setOCThreshold(Config.Data.overCurrentThreshold);
+                            // over-current threshold for the 2.8A NEMA23 motor
+                            // used in testing. If your motor stops working for
+                            // no apparent reason, it's probably this. Start low
+                            // and increase until it doesn't trip, then maybe
+                            // add one to avoid misfires. Can prevent catastrophic
+                            // failures caused by shorts
   driver.setOCShutdown(OC_SD_ENABLE); // shutdown motor bridge on over-current event
                                       // to protect against permanant damage
   
@@ -112,33 +121,42 @@ void setup()
   driver.setVoltageComp(VS_COMP_DISABLE); // no compensation for variation in Vs as
                                           // ADC voltage divider is not populated
                                           
-  driver.setSwitchMode(SW_USER); // switch doesn't trigger stop, status can be read
+  driver.setSwitchMode(SW_USER); // switch doesn't trigger stop, status can be read.
                                  // SW_HARD_STOP: TP1 causes hard stop on connection 
-                                 // to GND, get stuck on switch after homing
+                                 // to GND, you get stuck on switch after homing
                                       
   driver.setOscMode(INT_16MHZ); // 16MHz internal oscillator as clock source
 
-  // KVAL registers set
+  // KVAL registers set the power to the motor by adjusting the PWM duty cycle,
+  // use a value between 0-255 where 0 = no power, 255 = full power.
+  // Start low and monitor the motor temperature until you find a safe balance
+  // between power and temperature. Only use what you need
   driver.setRunKVAL(Config.Data.runKval);
   driver.setAccKVAL(Config.Data.runKval);
   driver.setDecKVAL(Config.Data.runKval);
   driver.setHoldKVAL(Config.Data.holdKval);
 
   driver.setParam(ALARM_EN, 0x8F); // disable ADC UVLO (divider not populated),
-                                   // stall detection (not configured),
-                                   // switch (not using as hard stop)
+                                   // disable stall detection (not configured),
+                                   // disable switch (not using as hard stop)
                                      
-  driver.getStatus();
+  driver.getStatus(); // clears error flags
 
   Serial.println(F("Initialisation complete"));
 }
 
+// loop -------------------------------------------------------------- loop
 void loop() 
 {
-  SerialCommandHandler.Process();
+  // only one function in loop
+  SerialCommandHandler.Process(); // check for new commands
+  // that's it!
 }
+// end loop ---------------------------------------------------------------
 
 
+// Useful conversion to convert the microstep units the interface uses
+// into the full step units that speeds are defined in
 float MicrostepsToSteps(float microsteps)
 {
   byte stepMode = driver.getStepMode();
@@ -146,9 +164,7 @@ float MicrostepsToSteps(float microsteps)
 }
 
 
-//-----------------------------------------------------------------------------
-
-
+// Serial command functions for controlling the powerSTEP01 ---------------
 void Cmd_GetStatus(CommandParameter &Parameters)
 {
   Serial.print(F("Status: "));
@@ -287,11 +303,7 @@ void Cmd_ReleaseSw(CommandParameter &Parameters)
   byte act = (byte)Parameters.NextParameterAsInteger();
   byte dir = (byte)Parameters.NextParameterAsInteger();
 
-  //float oldMinSpeed = driver.getMinSpeed();
-  //driver.setMinSpeed(driver.getMaxSpeed()/10);
   driver.releaseSw(act, dir);
-  //while(driver.busyCheck());
-  //driver.setMinSpeed(oldMinSpeed);
   
   Serial.print(F("Backing off Switch "));
   Serial.print(act);
@@ -304,16 +316,6 @@ void Cmd_GoHome(CommandParameter &Parameters)
   driver.goHome();
   Serial.println(F("Homing"));
 }
-
-/*void Cmd_AutoHome(CommandParameter &Parameters)
-{
-  CommandParameter Parameters2 = Parameters;
-  Cmd_GoUntil(Parameters);
-  while(driver.busyCheck());
-  Cmd_ReleaseSw(Parameters2);
-
-  Serial.println(F("Auto Homing"));
-}*/
 
 void Cmd_SetPos(CommandParameter &Parameters)
 {
