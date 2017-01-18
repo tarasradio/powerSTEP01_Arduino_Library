@@ -1,10 +1,7 @@
-SparkFun AutoDriver Arduino Library
+powerSTEP01 Arduino Library
 ==========
-[![AutoDriver](https://dlnmh9ip6v2uc.cloudfront.net/images/products/1/1/6/1/1/11611-01_medium.jpg)  
-*AutoDriver (BOB-13752)*](https://www.sparkfun.com/products/13752)
 
-The AutoDriver is a bipolar stepper driver based on the ST Micro L6470 chip.
-It allows a processor to control a single 3A bipolar stepper motor across an 8-45V supply range.
+This library is a modification of the L6470-based SparkFun AutoDriver library for the powerSTEP01-based STMicroelectronics X-NUCLEO-IHM03A1 stepper driver board.
 
 Repository Contents
 -------------------
@@ -16,22 +13,13 @@ Repository Contents
 Documentation
 -------------------
 * **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
-* **[Product Repository](https://github.com/sparkfun/L6470-AutoDriver)** - Main repository (including hardware files) for the AutoDriver board.
-* **[Hookup Guide](https://learn.sparkfun.com/tutorials/getting-started-with-the-autodriver---v13)** - Basic hookup guide for the AutoDriver board.
-
-Version History
--------------------
-
-* [v 1.0.0](https://github.com/sparkfun/SparkFun_AutoDriver_Arduino_Library/tree/V_1.0.0) - Initial release
-* [v 1.3.0](https://github.com/sparkfun/SparkFun_AutoDriver_Arduino_Library/tree/V_1.3.0) - Library release for V 1.3
 
 License Information
 -------------------
-This product is open source! 
+This product is open source!
 The code is beerware; if you see me (or any other SparkFun employee) at the local, and you've found our code helpful, please buy us a round!
 Please use, reuse, and modify these files as you see fit. Please maintain attribution to SparkFun Electronics and release anything derivative under the same license.
 
 Distributed as-is; no warranty is given.
 
 - Your friends at SparkFun.
-
