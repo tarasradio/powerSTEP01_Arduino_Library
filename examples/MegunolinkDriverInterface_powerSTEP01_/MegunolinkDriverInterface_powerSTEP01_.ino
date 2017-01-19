@@ -5,7 +5,7 @@
 // Using a version of the SparkFun powerSTEP library modified for the powerSTEP01 
 
 // Configuration structures used for EEPROM saving of configuration
-#include "powerSTEP01MegunolinkConfiguration.h"
+#include "powerSTEP01ConfigurationStructures.h"
 
 // Driver includes
 #include "powerSTEP01ArduinoLibrary.h"
